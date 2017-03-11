@@ -56,6 +56,16 @@ sudo rmmod tarfs.ko
 * **gnutar.h** Header definition for tar files, taken from
   https://www.gnu.org/software/tar/manual/html_node/Standard.html
 
+## Implementation
+
+This project focuses on the interaction part with Linux.  That's why the
+implementation of the Tar reading code is kept really simple: On mount, all
+file entries are read from the tar file, and stored as a linked list.  Some
+data, like the file path, is stored separatly in the structure to ease access.
+
+When Linux wants the module to list a directory, or find a specific file, the
+whole linked list is iterated, making most file system operations `O(n)`.
+
 ## Attention
 
 Please note that you're actually loading stuff into your kernel.  That means the
