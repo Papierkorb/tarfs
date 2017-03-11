@@ -59,6 +59,12 @@ static char *build_name(struct star_header *header)
   return name;
 }
 
+/**
+ * @brief Reads a tar header at the \a offset.
+ * @param sb the superblock to read from
+ * @param offset the 512-byte aligned offset
+ * @return the entry on success, else \c NULL
+ */
 struct tar_entry *tar_read_entry(struct super_block *sb, off_t offset)
 {
   struct star_header header;
@@ -154,6 +160,11 @@ struct tar_entry *tar_read_entry(struct super_block *sb, off_t offset)
   return entry;
 }
 
+/**
+ * @brief Reads all file headers from the \a sb
+ * @param sb the underlying super block
+ * @return the first entry, pointing at all other entries
+ */
 struct tar_entry *tar_open(struct super_block *sb)
 {
   struct tar_entry *first = tar_read_entry(sb, 0);
@@ -181,6 +192,10 @@ struct tar_entry *tar_open(struct super_block *sb)
   return first;
 }
 
+/**
+ * @brief Frees the \a entry, and all connected entries
+ * @param entry the entry to deallocate
+ */
 void tar_free(struct tar_entry *entry)
 {
   while (entry) {
@@ -196,6 +211,15 @@ void tar_free(struct tar_entry *entry)
   }
 }
 
+/**
+ * @brief Reads the payload of \a entry into \a buffer.
+ * @param sb the underlying super block
+ * @param entry the entry to read from
+ * @param off the offset inside the file data
+ * @param buffer the target buffer
+ * @param len byte count to read
+ * @return count of read bytes
+ */
 size_t tar_read(struct super_block *sb, struct tar_entry *entry,
                 unsigned int off, void *buffer, size_t len)
 {
@@ -203,6 +227,13 @@ size_t tar_read(struct super_block *sb, struct tar_entry *entry,
   return tarfs_read(buffer, to_read, entry->data_offset + off, sb);
 }
 
+/**
+ * @brief Finds an entry by its path.
+ * @param entry the start entry
+ * @param dirname the path to the directory containing the target entry
+ * @param basename the name of the target entry in its parent directory
+ * @return the found entry, or \c NULL
+ */
 struct tar_entry *tar_find(struct tar_entry *entry, const char *dirname,
                            const char *basename)
 {
